@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1b1446">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Panel Salta</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/manrope-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body data-momento="noche">
+  <main class="panel">
+
+    <!-- Hora, fecha y agenda -->
+    <section class="hero" aria-label="Hora y fecha">
+      <p class="fecha" id="fecha">&nbsp;</p>
+      <p class="reloj"><span id="hora">--:--</span><span class="segundos" id="segundos">--</span></p>
+      <p class="sub" id="sol">Salta</p>
+
+      <div class="card agenda" id="agenda">
+        <h2 class="titulo titulo-agenda"><svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Agenda</h2>
+        <div class="contenido" id="agenda-contenido">
+          <p class="vacio">Google Calendar se conecta en la próxima etapa.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Clima -->
+    <section class="card clima" id="clima" data-cielo="despejado-dia" aria-label="Clima">
+      <div class="clima-actual">
+        <div>
+          <h2 class="titulo"><svg class="ico" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>Salta</h2>
+          <p class="temp" id="clima-temp">--°</p>
+          <p class="desc" id="clima-desc">Cargando…</p>
+        </div>
+        <div class="clima-detalle">
+          <span class="clima-icono" id="clima-icono"></span>
+          <p id="clima-maxmin">&nbsp;</p>
+          <p><svg class="ico" viewBox="0 0 24 24"><path d="M12 3.5s-6 6.6-6 10.9a6 6 0 0 0 12 0C18 10.1 12 3.5 12 3.5z"/></svg><span id="clima-humedad">--</span></p>
+          <p><svg class="ico" viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h7"/></svg><span id="clima-viento">--</span></p>
+        </div>
+      </div>
+      <div class="pronostico" id="clima-pronostico"></div>
+      <p class="estado" id="clima-estado"></p>
+    </section>
+
+    <!-- Dólar -->
+    <section class="card dolar" id="dolar" aria-label="Dólar">
+      <h2 class="titulo titulo-dolar"><svg class="ico" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v5M18 9.5v5"/></svg>Dólar<span class="leyenda">compra · venta</span></h2>
+      <div class="filas" id="dolar-filas">
+        <p class="vacio">Cargando…</p>
+      </div>
+      <p class="estado" id="dolar-estado"></p>
+    </section>
+
+    <!-- Bitcoin -->
+    <section class="card btc" id="btc" aria-label="Bitcoin">
+      <h2 class="titulo titulo-btc"><svg class="ico" viewBox="0 0 24 24"><path d="M7 5h7a3.5 3.5 0 0 1 0 7H7zM7 12h8a3.5 3.5 0 0 1 0 7H7zM7 5v14M5 5h2M5 19h2M10 3v2M13 3v2M10 19v2M13 19v2"/></svg>Bitcoin</h2>
+      <div class="btc-linea">
+        <p class="btc-usd" id="btc-usd">US$ --</p>
+        <p class="variacion" id="btc-var-usd"></p>
+      </div>
+      <div class="btc-linea btc-ars-linea">
+        <p class="btc-ars" id="btc-ars">$ --</p>
+        <p class="variacion chica" id="btc-var-ars"></p>
+      </div>
+      <p class="estado" id="btc-estado"></p>
+    </section>
+
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

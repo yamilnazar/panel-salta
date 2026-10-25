@@ -1,0 +1,331 @@
+@font-face {
+  font-family: "Manrope";
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+  src: url("fonts/manrope-latin.woff2") format("woff2");
+}
+
+:root {
+  --texto: #f0eee9;               /* Cloud Dancer */
+  --texto-2: rgba(240, 238, 233, 0.68);
+  --texto-3: rgba(240, 238, 233, 0.5);
+  --card: rgba(18, 14, 36, 0.52);
+  --card-borde: rgba(255, 255, 255, 0.14);
+  --linea: rgba(255, 255, 255, 0.12);
+  --verde: #5ee6b0;
+  --rojo: #ff8a80;
+  --naranja: #ffb340;
+  --coral: #ff8a80;
+  --durazno: #ffc9a8;
+  --aviso: #ffd27a;
+  --radio: 26px;
+  --gap: 2vh;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body { height: 100%; }
+
+body {
+  font-family: "Manrope", system-ui, sans-serif;
+  color: var(--texto);
+  background-color: #1b1446;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: none;
+}
+
+/* Fondo según el momento del día */
+body[data-momento="amanecer"] {
+  background: radial-gradient(ellipse at 85% 110%, rgba(255, 197, 138, 0.75) 0%, transparent 50%),
+              linear-gradient(160deg, #3b2a6b 0%, #8a4f86 45%, #e77b6b 80%, #ffc58a 100%);
+}
+body[data-momento="dia"] {
+  background: radial-gradient(ellipse at 90% 0%, rgba(90, 209, 192, 0.45) 0%, transparent 55%),
+              linear-gradient(160deg, #0f3d6e 0%, #0f4c81 35%, #1e8fa8 75%, #5ad1c0 100%);
+}
+body[data-momento="atardecer"] {
+  background: radial-gradient(ellipse at 15% 110%, rgba(255, 122, 89, 0.85) 0%, transparent 45%),
+              radial-gradient(ellipse at 90% 0%, #3a2a8c 0%, transparent 55%),
+              linear-gradient(160deg, #1b1446 0%, #4a2370 50%, #a8457a 100%);
+}
+body[data-momento="noche"] {
+  background: radial-gradient(ellipse at 80% 0%, rgba(58, 74, 160, 0.45) 0%, transparent 55%),
+              linear-gradient(160deg, #05060f 0%, #111a3a 60%, #1d2a5c 100%);
+}
+
+.panel {
+  height: 100vh;
+  padding: 2.6vh 2.4vw;
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: var(--gap);
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--card-borde);
+  border-radius: var(--radio);
+  padding: 2.6vh 1.7vw;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.ico {
+  width: 1em;
+  height: 1em;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+
+.titulo {
+  font-size: clamp(14px, 2.6vh, 24px);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-bottom: 1.2vh;
+}
+.titulo-agenda { color: var(--coral); }
+.titulo-dolar { color: var(--verde); }
+.titulo-btc { color: var(--naranja); }
+
+.leyenda {
+  margin-left: auto;
+  font-weight: 500;
+  font-size: 0.8em;
+  color: var(--texto-3);
+}
+
+.num { font-variant-numeric: tabular-nums; }
+
+.vacio {
+  color: var(--texto-2);
+  font-size: clamp(13px, 2.3vh, 20px);
+}
+
+/* Mensaje discreto de estado / error */
+.estado {
+  margin-top: auto;
+  padding-top: 0.8vh;
+  font-size: clamp(11px, 1.7vh, 15px);
+  color: var(--texto-3);
+}
+.estado.error { color: var(--aviso); }
+
+/* Hora y fecha */
+.hero {
+  grid-row: 1 / 3;
+  grid-column: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 0.6vw;
+  min-width: 0;
+}
+.fecha {
+  font-size: clamp(16px, 3.6vh, 32px);
+  font-weight: 600;
+  color: var(--durazno);
+}
+.reloj {
+  font-size: clamp(64px, min(11.4vw, 25vh), 220px);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  margin: 0.4vh 0 0 -0.05em;
+}
+.segundos {
+  font-size: 0.3em;
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--texto-3);
+  margin-left: 0.25em;
+}
+.sub {
+  font-size: clamp(13px, 2.6vh, 22px);
+  font-weight: 500;
+  color: var(--texto-2);
+  margin-top: 1vh;
+}
+.agenda {
+  margin-top: 4vh;
+  flex: none;
+}
+
+/* Clima: degradado de cielo según condición */
+.clima {
+  grid-row: 1;
+  grid-column: 2 / 4;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.clima[data-cielo="despejado-dia"] { background: linear-gradient(180deg, #2f6fd6 0%, #5b9cf0 55%, #8fc1f7 100%); }
+.clima[data-cielo="nublado-dia"]   { background: linear-gradient(180deg, #4b6a8f 0%, #7590b2 55%, #a3b8d1 100%); }
+.clima[data-cielo="lluvia"]        { background: linear-gradient(180deg, #2f4458 0%, #4f6a85 55%, #7b93ab 100%); }
+.clima[data-cielo="tormenta"]      { background: linear-gradient(180deg, #23243a 0%, #3e4062 55%, #66698f 100%); }
+.clima[data-cielo="niebla"]        { background: linear-gradient(180deg, #5d6d7e 0%, #7f8e9e 55%, #a7b4c1 100%); }
+.clima[data-cielo="noche"]         { background: linear-gradient(180deg, #0d1736 0%, #1d2d5e 55%, #34508f 100%); }
+
+.clima-actual {
+  display: flex;
+  justify-content: space-between;
+  gap: 2vw;
+}
+.temp {
+  font-size: clamp(44px, 12vh, 112px);
+  font-weight: 300;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.desc {
+  font-size: clamp(15px, 3vh, 28px);
+  font-weight: 600;
+  margin-top: 0.6vh;
+}
+.clima-detalle {
+  text-align: right;
+  font-size: clamp(13px, 2.5vh, 22px);
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4vh;
+}
+.clima-detalle p {
+  display: flex;
+  align-items: center;
+  gap: 0.35em;
+}
+.clima-icono svg {
+  width: clamp(40px, 9vh, 84px);
+  height: clamp(40px, 9vh, 84px);
+}
+.pronostico {
+  margin-top: auto;
+  padding-top: 1.4vh;
+  border-top: 1px solid rgba(255, 255, 255, 0.32);
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  text-align: center;
+  font-size: clamp(13px, 2.5vh, 22px);
+  font-weight: 600;
+}
+.pronostico .dia { color: rgba(255, 255, 255, 0.82); }
+.pronostico svg {
+  width: clamp(22px, 4.4vh, 40px);
+  height: clamp(22px, 4.4vh, 40px);
+  margin: 0.4vh 0;
+}
+.pronostico .min { color: rgba(255, 255, 255, 0.7); font-weight: 500; }
+.clima .estado { color: rgba(255, 255, 255, 0.72); }
+.clima .estado.error { color: #fff3c4; }
+
+/* Íconos del clima en color */
+.i-sol { color: #ffe08a; }
+.i-luna { color: #e6ecff; }
+
+/* Dólar */
+.dolar { grid-row: 2; grid-column: 2; }
+.filas { display: flex; flex-direction: column; flex: 1; justify-content: space-around; }
+.fila {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 0.6vh 0;
+  border-bottom: 1px solid var(--linea);
+}
+.fila:last-child { border-bottom: 0; }
+.fila .nombre {
+  font-size: clamp(13px, 2.4vh, 21px);
+  font-weight: 500;
+  color: var(--texto-2);
+}
+.fila .valores {
+  font-size: clamp(16px, 3.6vh, 32px);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.fila .compra { color: var(--texto-2); }
+.fila .venta { font-weight: 700; }
+.fila .sep { color: var(--texto-3); margin: 0 0.25em; }
+
+/* Bitcoin */
+.btc {
+  grid-row: 2;
+  grid-column: 3;
+  background: linear-gradient(160deg, rgba(255, 159, 10, 0.34) 0%, var(--card) 62%);
+}
+.btc-linea {
+  display: flex;
+  flex-direction: column;
+}
+.btc-usd {
+  font-size: clamp(24px, 6.2vh, 54px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.btc-ars-linea { margin-top: auto; padding-top: 1.4vh; }
+.btc-ars {
+  font-size: clamp(16px, 3.6vh, 32px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.variacion {
+  font-size: clamp(14px, 2.8vh, 25px);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.variacion.chica { font-size: clamp(12px, 2.2vh, 19px); }
+.sube { color: var(--verde); }
+.baja { color: var(--rojo); }
+.btc .estado { margin-top: 0.8vh; }
+
+/* Pantallas angostas o verticales: se apila todo */
+@media (max-width: 899px), (orientation: portrait) {
+  body { overflow: auto; }
+  .panel {
+    height: auto;
+    min-height: 100vh;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: none;
+    padding: 16px;
+    gap: 14px;
+  }
+  .hero, .clima, .dolar, .btc { grid-row: auto; grid-column: 1; }
+  .hero { padding: 12px 4px 0; }
+  .reloj { font-size: clamp(64px, 24vw, 180px); }
+  .card { padding: 18px 20px; }
+  .agenda { margin-top: 18px; }
+  .temp { font-size: clamp(48px, 16vw, 96px); }
+  .clima-icono svg { width: 56px; height: 56px; }
+  .titulo { font-size: 17px; margin-bottom: 10px; }
+  .fecha { font-size: clamp(16px, 5vw, 26px); }
+  .sub, .desc { font-size: 17px; }
+  .clima-detalle, .pronostico, .fila .nombre { font-size: 15px; }
+  .pronostico svg { width: 28px; height: 28px; }
+  .fila .valores { font-size: clamp(18px, 6vw, 26px); }
+  .btc-usd { font-size: clamp(28px, 9vw, 44px); }
+  .btc-ars { font-size: clamp(18px, 6vw, 28px); }
+  .variacion { font-size: 17px; }
+  .variacion.chica, .vacio { font-size: 15px; }
+  .estado { font-size: 13px; padding-top: 10px; }
+}

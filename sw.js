@@ -1,6 +1,6 @@
 // Solo guarda los archivos propios del panel (no los datos de las APIs).
 // Primero intenta la red; si no hay conexión, usa la copia guardada.
-var CACHE = "panel-salta-v2";
+var CACHE = "panel-salta-v3";
 var ARCHIVOS = ["./", "index.html", "styles.css", "app.js", "manifest.webmanifest", "icon.svg", "fonts/manrope-latin.woff2"];
 
 self.addEventListener("install", function (e) {

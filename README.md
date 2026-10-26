@@ -9,7 +9,7 @@ HTML, CSS y JavaScript puros, sin frameworks ni build.
 |---|---|---|
 | Hora y fecha (es-AR, America/Argentina/Salta) | reloj del dispositivo | 1 s |
 | Agenda | Google Calendar (próxima etapa) | 1 min |
-| Bitcoin USD / ARS + variación 24 h | api.coingecko.com | 2 min |
+| Mercados en USD + variación 24 h: bitcoin, ethereum, S&P 500 (SPY), oro (PAXG, onza) y petróleo (fondo USO) | api.coingecko.com | 2 min |
 | Dólar oficial, blue, MEP, tarjeta, cripto | dolarapi.com | 10 min |
 | Clima actual + 4 días + alertas (lluvia, tormenta, calor, frío, ráfagas en 24 h) | api.open-meteo.com | 30 min |
 | Próximo feriado nacional | api.argentinadatos.com | 1 vez por día (guardado en el navegador) |

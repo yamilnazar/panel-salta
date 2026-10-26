@@ -13,7 +13,7 @@
     intervalos: {
       feriado: 60 * 60 * 1000, // revisa cada hora; descarga la lista una vez por día
       agenda: 60 * 1000,
-      btc: 2 * 60 * 1000,
+      mercados: 2 * 60 * 1000,
       dolar: 10 * 60 * 1000,
       clima: 30 * 60 * 1000,
       recarga: 6 * 60 * 60 * 1000
@@ -335,21 +335,45 @@
     $("dolar-filas").innerHTML = html;
   }
 
-  // ---------- Bitcoin ----------
+  // ---------- Mercados (CoinGecko, en USD) ----------
 
-  function variacion(el, valor) {
-    if (typeof valor !== "number") { el.textContent = ""; return; }
-    var sube = valor >= 0;
-    el.className = el.className.replace(/\s*(sube|baja)/g, "") + (sube ? " sube" : " baja");
-    el.textContent = (sube ? "▲ " : "▼ ") + fmtDecimal.format(Math.abs(valor)) + " % · 24 h";
+  // S&P 500, oro y petróleo salen de sus versiones tokenizadas en CoinGecko:
+  // SPY (ETF del S&P 500), PAXG (1 onza troy de oro) y USO (fondo de petróleo).
+  var MERCADOS = [
+    { id: "bitcoin", nombre: "Bitcoin" },
+    { id: "ethereum", nombre: "Ethereum" },
+    { id: "spdr-s-p-500-etf-ondo-tokenized-etf", nombre: "S&amp;P 500", sigla: "SPY" },
+    { id: "pax-gold", nombre: "Oro", sigla: "oz" },
+    { id: "united-states-oil-fund-ondo-tokenized", nombre: "Petróleo", sigla: "USO" }
+  ];
+
+  function cargarMercados() {
+    var ids = MERCADOS.map(function (m) { return m.id; }).join(",");
+    return fetchJSON("https://api.coingecko.com/api/v3/simple/price?ids=" + ids +
+      "&vs_currencies=usd&include_24hr_change=true");
   }
 
-  function mostrarBtc(d) {
-    var b = d.bitcoin;
-    $("btc-usd").textContent = "US$ " + fmtEntero.format(Math.round(b.usd));
-    $("btc-ars").textContent = "$ " + fmtEntero.format(Math.round(b.ars));
-    variacion($("btc-var-usd"), b.usd_24h_change);
-    variacion($("btc-var-ars"), b.ars_24h_change);
+  function precioUsd(n) {
+    if (typeof n !== "number") return "—";
+    return n >= 1000 ? fmtEntero.format(Math.round(n)) : fmtDecimal.format(n);
+  }
+
+  function variacion(valor) {
+    if (typeof valor !== "number") return "";
+    var sube = valor >= 0;
+    return '<span class="variacion ' + (sube ? "sube" : "baja") + '">' +
+      (sube ? "▲ " : "▼ ") + fmtDecimal.format(Math.abs(valor)) + " %</span>";
+  }
+
+  function mostrarMercados(d) {
+    var html = "";
+    MERCADOS.forEach(function (m) {
+      var x = d[m.id] || {};
+      html += '<div class="fila"><span class="nombre">' + m.nombre +
+        (m.sigla ? " <small>" + m.sigla + "</small>" : "") + '</span><span class="valores">' +
+        '<span class="venta">' + precioUsd(x.usd) + "</span>" + variacion(x.usd_24h_change) + "</span></div>";
+    });
+    $("mercados-filas").innerHTML = html;
   }
 
   // ---------- Próximo feriado (argentinadatos.com) ----------
@@ -443,13 +467,7 @@
 
   bloque({ nombre: "clima", estadoId: "clima-estado", intervalo: CONFIG.intervalos.clima, cargar: cargarClima, mostrar: mostrarClima });
   bloque({ nombre: "dolar", estadoId: "dolar-estado", intervalo: CONFIG.intervalos.dolar, cargar: function () { return fetchJSON("https://dolarapi.com/v1/dolares"); }, mostrar: mostrarDolar });
-  bloque({
-    nombre: "btc", estadoId: "btc-estado", intervalo: CONFIG.intervalos.btc,
-    cargar: function () {
-      return fetchJSON("https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd,ars&include_24hr_change=true");
-    },
-    mostrar: mostrarBtc
-  });
+  bloque({ nombre: "mercados", estadoId: "mercados-estado", intervalo: CONFIG.intervalos.mercados, cargar: cargarMercados, mostrar: mostrarMercados });
   bloque({ nombre: "feriado", estadoId: "feriado-estado", intervalo: CONFIG.intervalos.feriado, cargar: cargarFeriado, mostrar: mostrarFeriado });
   bloque({ nombre: "agenda", estadoId: null, intervalo: CONFIG.intervalos.agenda, cargar: cargarAgenda, mostrar: mostrarAgenda });
 

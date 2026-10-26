@@ -489,14 +489,21 @@
 
   var wakeLock = null;
   function pedirWakeLock() {
-    if (!("wakeLock" in navigator) || document.visibilityState !== "visible") return;
+    if (wakeLock || !("wakeLock" in navigator) || document.visibilityState !== "visible") return;
     navigator.wakeLock.request("screen")
-      .then(function (wl) { wakeLock = wl; })
+      .then(function (wl) {
+        wakeLock = wl;
+        // Android puede soltarlo (batería baja, cambio de app); se vuelve a pedir.
+        wl.addEventListener("release", function () { wakeLock = null; });
+      })
       .catch(function () { /* sin soporte o sin HTTPS */ });
   }
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState === "visible") pedirWakeLock();
   });
+  // Si por algo se perdió, se reintenta cada minuto y al tocar la pantalla.
+  setInterval(pedirWakeLock, 60 * 1000);
+  document.addEventListener("pointerdown", pedirWakeLock);
 
   // ---------- Inicio ----------
 

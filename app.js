@@ -6,13 +6,15 @@
     lon: -65.4117,
     zona: "America/Argentina/Salta",
     timeoutMs: 10000,
+    noticiasUrl: "https://raw.githubusercontent.com/yamilnazar/panel-salta/datos/noticias.json",
     // Modo noche: solo la hora, en gris tenue (horas de Salta, desde inclusive, hasta exclusive)
     reposo: { desde: 0, hasta: 6 },
     // Umbrales de las alertas del clima
     alertas: { lluviaProb: 50, calor: 32, frio: 4, rafaga: 50 },
     intervalos: {
       feriado: 60 * 60 * 1000, // revisa cada hora; descarga la lista una vez por día
-      agenda: 60 * 1000,
+      noticias: 15 * 60 * 1000,
+      rotarNoticias: 15 * 1000,
       mercados: 2 * 60 * 1000,
       dolar: 10 * 60 * 1000,
       clima: 30 * 60 * 1000,
@@ -437,15 +439,51 @@
       "</span> · " + f.nombre.replace(/</g, "&lt;");
   }
 
-  // ---------- Agenda (Google Calendar, próxima etapa) ----------
+  // ---------- Noticias de mercados y cripto ----------
+  // GitHub Actions junta los titulares cada 30 min (scripts/noticias.py) y los deja en la rama "datos".
 
-  function cargarAgenda() {
-    return Promise.resolve(null);
+  var noticias = [];
+  var paginaNoticias = 0;
+  var POR_PAGINA = 3;
+
+  function escapar(texto) {
+    return String(texto).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
 
-  function mostrarAgenda() {
-    // Se completa cuando se conecte Google Calendar.
+  function hace(unix) {
+    var min = Math.max(0, Math.round((Date.now() / 1000 - unix) / 60));
+    if (min < 60) return "hace " + min + " min";
+    var h = Math.round(min / 60);
+    return h < 24 ? "hace " + h + " h" : "ayer";
   }
+
+  function pintarNoticias() {
+    if (!noticias.length) return;
+    var paginas = Math.ceil(noticias.length / POR_PAGINA);
+    if (paginaNoticias >= paginas) paginaNoticias = 0;
+
+    var html = "";
+    noticias.slice(paginaNoticias * POR_PAGINA, (paginaNoticias + 1) * POR_PAGINA).forEach(function (n) {
+      html += '<li><p class="meta"><span class="tag tag-' + n.categoria + '">' +
+        (n.categoria === "cripto" ? "Cripto" : "Mercados") + "</span>" +
+        escapar(n.fuente) + " · " + hace(n.fecha) + '</p><p class="titular">' + escapar(n.titulo) + "</p></li>";
+    });
+    $("noticias-lista").innerHTML = html;
+    $("noticias-pagina").textContent = paginas > 1 ? (paginaNoticias + 1) + " / " + paginas : "";
+  }
+
+  function mostrarNoticias(d) {
+    noticias = d.noticias || [];
+    paginaNoticias = 0;
+    pintarNoticias();
+  }
+
+  // Pasa a los siguientes titulares cada tantos segundos
+  setInterval(function () {
+    if (noticias.length <= POR_PAGINA || document.body.classList.contains("reposo")) return;
+    paginaNoticias++;
+    pintarNoticias();
+  }, CONFIG.intervalos.rotarNoticias);
 
   // ---------- Mantener pantalla encendida ----------
 
@@ -469,7 +507,7 @@
   bloque({ nombre: "dolar", estadoId: "dolar-estado", intervalo: CONFIG.intervalos.dolar, cargar: function () { return fetchJSON("https://dolarapi.com/v1/dolares"); }, mostrar: mostrarDolar });
   bloque({ nombre: "mercados", estadoId: "mercados-estado", intervalo: CONFIG.intervalos.mercados, cargar: cargarMercados, mostrar: mostrarMercados });
   bloque({ nombre: "feriado", estadoId: "feriado-estado", intervalo: CONFIG.intervalos.feriado, cargar: cargarFeriado, mostrar: mostrarFeriado });
-  bloque({ nombre: "agenda", estadoId: null, intervalo: CONFIG.intervalos.agenda, cargar: cargarAgenda, mostrar: mostrarAgenda });
+  bloque({ nombre: "noticias", estadoId: "noticias-estado", intervalo: CONFIG.intervalos.noticias, cargar: function () { return fetchJSON(CONFIG.noticiasUrl); }, mostrar: mostrarNoticias });
 
   // Recarga completa cada 6 h para liberar memoria.
   setTimeout(function () { location.reload(); }, CONFIG.intervalos.recarga);

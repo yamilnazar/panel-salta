@@ -96,7 +96,7 @@ body[data-momento="noche"] {
   gap: 0.4em;
   margin-bottom: 1.2vh;
 }
-.titulo-agenda { color: var(--coral); }
+.titulo-noticias { color: var(--coral); }
 .titulo-dolar { color: var(--verde); }
 .titulo-mercados { color: var(--naranja); }
 
@@ -176,10 +176,49 @@ body[data-momento="noche"] {
   color: var(--texto);
 }
 .feriado .estado:empty, .feriado .estado:not(.error) { display: none; }
-.agenda {
+.noticias {
   margin-top: var(--gap);
   flex: none;
 }
+.lista-noticias {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.3vh;
+}
+.lista-noticias li + li {
+  border-top: 1px solid var(--linea);
+  padding-top: 1.3vh;
+}
+.lista-noticias .meta {
+  font-size: clamp(11px, 1.8vh, 16px);
+  font-weight: 500;
+  color: var(--texto-3);
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.tag {
+  font-size: 0.85em;
+  font-weight: 700;
+  padding: 0.1em 0.6em;
+  border-radius: 999px;
+}
+.tag-mercados { background: rgba(94, 230, 176, 0.18); color: var(--verde); }
+.tag-cripto { background: rgba(255, 179, 64, 0.18); color: var(--naranja); }
+.titular {
+  font-size: clamp(14px, 2.5vh, 22px);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 0.4vh;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.noticias .estado:not(.error) { display: none; }
 
 /* Clima: degradado de cielo según condición */
 .clima {
@@ -377,7 +416,9 @@ body.reposo .reloj {
   .hero { padding: 12px 4px 0; }
   .reloj { font-size: clamp(64px, 24vw, 180px); }
   .card { padding: 18px 20px; }
-  .agenda { margin-top: 18px; }
+  .noticias { margin-top: 14px; }
+  .titular { font-size: 16px; }
+  .lista-noticias .meta { font-size: 12px; }
   .temp { font-size: clamp(48px, 16vw, 96px); }
   .clima-icono svg { width: 56px; height: 56px; }
   .titulo { font-size: 17px; margin-bottom: 10px; }

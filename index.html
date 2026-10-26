@@ -14,7 +14,7 @@
 <body data-momento="noche">
   <main class="panel">
 
-    <!-- Hora, fecha y agenda -->
+    <!-- Hora, fecha, feriado y noticias -->
     <section class="hero" aria-label="Hora y fecha">
       <p class="fecha" id="fecha">&nbsp;</p>
       <p class="reloj"><span id="hora">--:--</span><span class="segundos" id="segundos">--</span></p>
@@ -26,11 +26,12 @@
         <p class="estado" id="feriado-estado"></p>
       </div>
 
-      <div class="card agenda" id="agenda">
-        <h2 class="titulo titulo-agenda"><svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Agenda</h2>
-        <div class="contenido" id="agenda-contenido">
-          <p class="vacio">Google Calendar se conecta en la próxima etapa.</p>
-        </div>
+      <div class="card noticias" id="noticias">
+        <h2 class="titulo titulo-noticias"><svg class="ico" viewBox="0 0 24 24"><rect x="3" y="4.5" width="15" height="15" rx="2.5"/><path d="M18 8.5h3v8.5a2.5 2.5 0 0 1-5 0M7 9h7M7 12.5h7M7 16h4"/></svg>Noticias<span class="leyenda" id="noticias-pagina"></span></h2>
+        <ul class="lista-noticias" id="noticias-lista">
+          <li class="vacio">Cargando…</li>
+        </ul>
+        <p class="estado" id="noticias-estado"></p>
       </div>
     </section>
 

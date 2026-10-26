@@ -6,7 +6,12 @@
     lon: -65.4117,
     zona: "America/Argentina/Salta",
     timeoutMs: 10000,
+    // Modo noche: solo la hora, en gris tenue (horas de Salta, desde inclusive, hasta exclusive)
+    reposo: { desde: 0, hasta: 6 },
+    // Umbrales de las alertas del clima
+    alertas: { lluviaProb: 50, calor: 32, frio: 4, rafaga: 50 },
     intervalos: {
+      feriado: 60 * 60 * 1000, // revisa cada hora; descarga la lista una vez por día
       agenda: 60 * 1000,
       btc: 2 * 60 * 1000,
       dolar: 10 * 60 * 1000,
@@ -176,6 +181,12 @@
       document.body.setAttribute("data-momento", momento);
     }
 
+    var hora = parseInt(p.hour, 10);
+    var reposo = hora >= CONFIG.reposo.desde && hora < CONFIG.reposo.hasta;
+    if (document.body.classList.contains("reposo") !== reposo) {
+      document.body.classList.toggle("reposo", reposo);
+    }
+
     // Alinea con el cambio de segundo para que la hora no "salte".
     setTimeout(tic, 1000 - (Date.now() % 1000) + 15);
   }
@@ -186,9 +197,10 @@
     var url = "https://api.open-meteo.com/v1/forecast" +
       "?latitude=" + CONFIG.lat + "&longitude=" + CONFIG.lon +
       "&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code,is_day" +
+      "&hourly=weather_code,precipitation_probability,temperature_2m,wind_gusts_10m" +
       "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset" +
       "&timezone=" + encodeURIComponent(CONFIG.zona) +
-      "&timeformat=unixtime&forecast_days=5";
+      "&timeformat=unixtime&forecast_days=5&forecast_hours=24";
     return fetchJSON(url);
   }
 
@@ -226,6 +238,73 @@
         Math.round(dia.temperature_2m_min[i]) + "°</span></div></div>";
     }
     $("clima-pronostico").innerHTML = html;
+
+    $("clima-alertas").innerHTML = alertasClima(d.hourly, info.cielo).slice(0, 2).map(function (a) {
+      return '<p class="alerta alerta-' + a.tipo + '">' + ALERTA_ICONO[a.tipo] + "<span>" + a.texto + "</span></p>";
+    }).join("");
+  }
+
+  // ---------- Alertas del clima (próximas 24 h) ----------
+
+  var ALERTA_ICONO = {
+    tormenta: '<svg class="ico" viewBox="0 0 24 24"><path d="M13 3L5 13.5h6L10 21l8-10.5h-6z"/></svg>',
+    lluvia: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 3.5s-6 6.6-6 10.9a6 6 0 0 0 12 0C18 10.1 12 3.5 12 3.5z"/></svg>',
+    calor: '<svg class="ico" viewBox="0 0 24 24"><path d="M10 13.5V5a2 2 0 0 1 4 0v8.5a4 4 0 1 1-4 0z"/><path d="M12 9v7"/></svg>',
+    frio: '<svg class="ico" viewBox="0 0 24 24"><path d="M12 2.5v19M4 7l16 10M20 7L4 17M9.5 4.5L12 7l2.5-2.5M9.5 19.5L12 17l2.5 2.5"/></svg>',
+    viento: '<svg class="ico" viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h7"/></svg>'
+  };
+
+  // "a las 16 h" o "mañana a las 8 h", según el día en Salta.
+  function cuando(unix) {
+    var fecha = new Date(unix * 1000);
+    var p = partesSalta(fecha);
+    var hoy = partesSalta(new Date());
+    return (p.day === hoy.day ? "a las " : "mañana ") + parseInt(p.hour, 10) + " h";
+  }
+
+  function alertasClima(h, cieloActual) {
+    var lista = [];
+    if (!h || !h.time) return lista;
+    var ahora = Date.now() / 1000 - 3600;
+    var i, max = -99, min = 99, rafaga = 0;
+
+    for (i = 0; i < h.time.length; i++) {
+      if (h.time[i] < ahora) continue;
+      if (h.temperature_2m[i] > max) max = h.temperature_2m[i];
+      if (h.temperature_2m[i] < min) min = h.temperature_2m[i];
+      if (h.wind_gusts_10m[i] > rafaga) rafaga = h.wind_gusts_10m[i];
+    }
+
+    // Tormenta o lluvia: primera hora probable (si no está lloviendo ya)
+    if (cieloActual !== "tormenta" && cieloActual !== "lluvia") {
+      for (i = 0; i < h.time.length; i++) {
+        if (h.time[i] < ahora) continue;
+        if (h.weather_code[i] >= 95) {
+          lista.push({ tipo: "tormenta", texto: "Tormenta probable " + cuando(h.time[i]) });
+          break;
+        }
+        if (h.precipitation_probability[i] >= CONFIG.alertas.lluviaProb) {
+          lista.push({
+            tipo: "lluvia",
+            texto: "Lluvia probable " + cuando(h.time[i]) + " (" + h.precipitation_probability[i] + " %)"
+          });
+          break;
+        }
+      }
+    }
+
+    if (max >= CONFIG.alertas.calor) {
+      lista.push({ tipo: "calor", texto: "Calor intenso · hasta " + Math.round(max) + "°" });
+    }
+    if (min <= 0) {
+      lista.push({ tipo: "frio", texto: "Posible helada · mínima " + Math.round(min) + "°" });
+    } else if (min <= CONFIG.alertas.frio) {
+      lista.push({ tipo: "frio", texto: "Frío intenso · mínima " + Math.round(min) + "°" });
+    }
+    if (rafaga >= CONFIG.alertas.rafaga) {
+      lista.push({ tipo: "viento", texto: "Ráfagas de hasta " + Math.round(rafaga) + " km/h" });
+    }
+    return lista;
   }
 
   // ---------- Dólar ----------
@@ -234,7 +313,8 @@
     { casa: "oficial", nombre: "Oficial" },
     { casa: "blue", nombre: "Blue" },
     { casa: "bolsa", nombre: "MEP" },
-    { casa: "tarjeta", nombre: "Tarjeta" }
+    { casa: "tarjeta", nombre: "Tarjeta" },
+    { casa: "cripto", nombre: "Cripto" }
   ];
 
   function precio(n) {
@@ -270,6 +350,67 @@
     $("btc-ars").textContent = "$ " + fmtEntero.format(Math.round(b.ars));
     variacion($("btc-var-usd"), b.usd_24h_change);
     variacion($("btc-var-ars"), b.ars_24h_change);
+  }
+
+  // ---------- Próximo feriado (argentinadatos.com) ----------
+
+  var fmtISO = new Intl.DateTimeFormat("en-CA", {
+    timeZone: CONFIG.zona, year: "numeric", month: "2-digit", day: "2-digit"
+  });
+  var CLAVE_FERIADOS = "panel-feriados";
+
+  function hoyISO() {
+    return fmtISO.format(new Date());
+  }
+
+  function leerCache() {
+    try { return JSON.parse(localStorage.getItem(CLAVE_FERIADOS)); } catch (e) { return null; }
+  }
+
+  function guardarCache(datos) {
+    try { localStorage.setItem(CLAVE_FERIADOS, JSON.stringify(datos)); } catch (e) { /* sin almacenamiento */ }
+  }
+
+  function proximoDe(lista, hoy) {
+    for (var i = 0; i < lista.length; i++) {
+      if (lista[i].fecha >= hoy) return lista[i];
+    }
+    return null;
+  }
+
+  function cargarFeriado() {
+    var hoy = hoyISO();
+    var cache = leerCache();
+    // La lista se descarga una vez por día; el resto del tiempo se usa la guardada.
+    if (cache && cache.dia === hoy && proximoDe(cache.lista, hoy)) {
+      return Promise.resolve(proximoDe(cache.lista, hoy));
+    }
+    var anio = parseInt(hoy.slice(0, 4), 10);
+    var base = "https://api.argentinadatos.com/v1/feriados/";
+    return fetchJSON(base + anio)
+      .then(function (lista) {
+        if (proximoDe(lista, hoy)) return lista;
+        return fetchJSON(base + (anio + 1)); // fin de año: buscar en el siguiente
+      })
+      .then(function (lista) {
+        lista.sort(function (a, b) { return a.fecha < b.fecha ? -1 : 1; });
+        guardarCache({ dia: hoy, lista: lista });
+        var prox = proximoDe(lista, hoy);
+        if (!prox) throw new Error("Sin feriados próximos");
+        return prox;
+      });
+  }
+
+  function mostrarFeriado(f) {
+    var a = f.fecha.split("-");
+    var fecha = new Date(Date.UTC(+a[0], +a[1] - 1, +a[2], 12));
+    var h = hoyISO().split("-");
+    var dias = Math.round((fecha - Date.UTC(+h[0], +h[1] - 1, +h[2], 12)) / 86400000);
+    var dia = fmtDiaCorto.format(fecha).replace(".", "");
+
+    $("feriado-cuanto").textContent = dias === 0 ? "hoy" : dias === 1 ? "mañana" : "en " + dias + " días";
+    $("feriado-nombre").innerHTML = '<span class="feriado-fecha">' + dia + " " + a[2] + "/" + a[1] +
+      "</span> · " + f.nombre.replace(/</g, "&lt;");
   }
 
   // ---------- Agenda (Google Calendar, próxima etapa) ----------
@@ -309,6 +450,7 @@
     },
     mostrar: mostrarBtc
   });
+  bloque({ nombre: "feriado", estadoId: "feriado-estado", intervalo: CONFIG.intervalos.feriado, cargar: cargarFeriado, mostrar: mostrarFeriado });
   bloque({ nombre: "agenda", estadoId: null, intervalo: CONFIG.intervalos.agenda, cargar: cargarAgenda, mostrar: mostrarAgenda });
 
   // Recarga completa cada 6 h para liberar memoria.

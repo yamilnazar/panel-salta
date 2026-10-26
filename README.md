@@ -10,8 +10,12 @@ HTML, CSS y JavaScript puros, sin frameworks ni build.
 | Hora y fecha (es-AR, America/Argentina/Salta) | reloj del dispositivo | 1 s |
 | Agenda | Google Calendar (próxima etapa) | 1 min |
 | Bitcoin USD / ARS + variación 24 h | api.coingecko.com | 2 min |
-| Dólar oficial, blue, MEP, tarjeta | dolarapi.com | 10 min |
-| Clima actual + 4 días | api.open-meteo.com | 30 min |
+| Dólar oficial, blue, MEP, tarjeta, cripto | dolarapi.com | 10 min |
+| Clima actual + 4 días + alertas (lluvia, tormenta, calor, frío, ráfagas en 24 h) | api.open-meteo.com | 30 min |
+| Próximo feriado nacional | api.argentinadatos.com | 1 vez por día (guardado en el navegador) |
+
+Modo noche: de 0 a 6 h solo se ve la hora en gris tenue sobre negro.
+Horario y umbrales de las alertas se cambian en `CONFIG` al principio de `app.js`.
 
 - Todos los `fetch` usan `cache: "no-store"` y un tiempo límite de 10 s.
 - Si una API falla, ese bloque muestra "Sin conexión · último dato HH:MM" y el resto sigue.

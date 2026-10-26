@@ -20,6 +20,12 @@
       <p class="reloj"><span id="hora">--:--</span><span class="segundos" id="segundos">--</span></p>
       <p class="sub" id="sol">Salta</p>
 
+      <div class="card feriado" id="feriado">
+        <h2 class="titulo titulo-feriado"><svg class="ico" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Próximo feriado<span class="leyenda" id="feriado-cuanto"></span></h2>
+        <p class="feriado-nombre" id="feriado-nombre">Cargando…</p>
+        <p class="estado" id="feriado-estado"></p>
+      </div>
+
       <div class="card agenda" id="agenda">
         <h2 class="titulo titulo-agenda"><svg class="ico" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15.5" rx="3"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>Agenda</h2>
         <div class="contenido" id="agenda-contenido">
@@ -43,6 +49,7 @@
           <p><svg class="ico" viewBox="0 0 24 24"><path d="M3 8h11a3 3 0 1 0-3-3M3 12h16a3 3 0 1 1-3 3M3 16h7"/></svg><span id="clima-viento">--</span></p>
         </div>
       </div>
+      <div class="alertas" id="clima-alertas"></div>
       <div class="pronostico" id="clima-pronostico"></div>
       <p class="estado" id="clima-estado"></p>
     </section>
